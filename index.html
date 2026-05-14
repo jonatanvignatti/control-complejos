@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control — Números Complejos | ULS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --azul: #00467F;
+    --azul-light: #1a6aa8;
+    --azul-pale: #e8f2fa;
+    --gold: #D4A017;
+    --gold-light: #f0d878;
+    --green: #1a7a4a;
+    --green-bg: #e8f5ee;
+    --red: #c0392b;
+    --red-bg: #fdecea;
+    --gray-100: #f8f7f5;
+    --gray-200: #eeece8;
+    --gray-400: #b0ada6;
+    --gray-700: #4a4845;
+    --gray-900: #1e1d1b;
+    --radius: 8px;
+    --shadow: 0 2px 12px rgba(0,70,127,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--azul);
+    color: white;
+    padding: 2rem 2rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    border-bottom: 4px solid var(--gold);
+  }
+  .header-logo {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 18px; color: var(--azul);
+    flex-shrink: 0; margin-top: 4px;
+  }
+  .header-text h1 { font-size: 1.55rem; font-weight: 600; letter-spacing: -0.3px; }
+  .header-text p  { font-size: 0.92rem; opacity: 0.82; margin-top: 4px; font-weight: 300; }
+
+  /* ── MAIN ── */
+  main { max-width: 820px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* ── PORTADA / NOMBRE ── */
+  .cover-card {
+    background: white;
+    border: 0.5px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+  .cover-card h2 { font-size: 1.1rem; font-weight: 600; color: var(--azul); margin-bottom: 1rem; }
+  .cover-card label { font-size: 0.88rem; color: var(--gray-700); display: block; margin-bottom: 6px; }
+  .cover-card input[type=text] {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--gray-200); border-radius: var(--radius);
+    font-family: inherit; font-size: 1rem; color: var(--gray-900);
+    background: var(--gray-100); transition: border 0.2s;
+  }
+  .cover-card input[type=text]:focus { outline: none; border-color: var(--azul-light); background: white; }
+  .start-btn {
+    margin-top: 1.25rem;
+    background: var(--azul); color: white;
+    border: none; border-radius: var(--radius);
+    padding: 11px 28px; font-family: inherit; font-size: 1rem;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .start-btn:hover { background: var(--azul-light); }
+
+  /* ── QUIZ CONTAINER ── */
+  #quiz-section { display: none; }
+
+  .progress-bar-wrap { margin-bottom: 1.5rem; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--gray-700); margin-bottom: 6px; }
+  .progress-track { height: 5px; background: var(--gray-200); border-radius: 99px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: var(--azul); border-radius: 99px; transition: width 0.4s; }
+
+  /* ── QUESTION CARD ── */
+  .q-card {
+    background: white; border-radius: 12px;
+    border: 0.5px solid var(--gray-200);
+    padding: 1.75rem 2rem; margin-bottom: 1.25rem;
+    box-shadow: var(--shadow); animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .q-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--azul-light); letter-spacing: 0.5px;
+    margin-bottom: 10px; text-transform: uppercase;
+  }
+  .q-text { font-size: 1.05rem; line-height: 1.7; color: var(--gray-900); margin-bottom: 1.25rem; }
+
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    width: 100%; text-align: left;
+    padding: 11px 16px; border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    background: var(--gray-100);
+    font-family: inherit; font-size: 0.97rem; color: var(--gray-900);
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--azul-light); background: var(--azul-pale); }
+  .option-btn .opt-letter {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+    background: var(--gray-200); color: var(--gray-700);
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
+  }
+  .option-btn.selected-correct { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .option-btn.selected-correct .opt-letter { background: var(--green); color: white; }
+  .option-btn.selected-wrong   { background: var(--red-bg);   border-color: var(--red);   color: var(--red); }
+  .option-btn.selected-wrong   .opt-letter { background: var(--red); color: white; }
+  .option-btn.reveal-correct   { background: var(--green-bg); border-color: var(--green); color: var(--green); opacity: 0.75; }
+  .option-btn.reveal-correct   .opt-letter { background: var(--green); color: white; }
+  .option-btn:disabled { cursor: default; }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    margin-top: 1rem; padding: 12px 16px;
+    border-radius: var(--radius); font-size: 0.93rem; line-height: 1.6;
+    border-left: 4px solid;
+  }
+  .feedback.correct { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .feedback.wrong   { background: var(--red-bg);   border-color: var(--red);   color: var(--red); }
+  .feedback strong  { font-weight: 600; }
+
+  /* ── SCORE CARD ── */
+  #score-section { display: none; }
+  .score-card {
+    background: white; border-radius: 16px;
+    border: 0.5px solid var(--gray-200);
+    padding: 2.5rem; text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .score-ring {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--azul); color: white;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+  .score-ring .pts { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 600; }
+  .score-ring .lbl { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
+  .nota-display { font-size: 3.2rem; font-weight: 600; color: var(--azul); margin: 0.5rem 0; }
+  .nota-label   { font-size: 0.88rem; color: var(--gray-700); }
+  .score-name   { font-size: 1.05rem; margin-bottom: 1rem; color: var(--gray-700); }
+
+  .result-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px; margin: 1.5rem 0;
+  }
+  .result-stat {
+    background: var(--gray-100); border-radius: var(--radius);
+    padding: 12px 8px; text-align: center;
+  }
+  .result-stat .val { font-size: 1.4rem; font-weight: 600; color: var(--azul); font-family: 'JetBrains Mono', monospace; }
+  .result-stat .key { font-size: 0.78rem; color: var(--gray-700); margin-top: 4px; }
+
+  .dl-btn {
+    margin-top: 1.5rem;
+    background: var(--gold); color: var(--gray-900);
+    border: none; border-radius: var(--radius);
+    padding: 11px 28px; font-family: inherit; font-size: 0.97rem;
+    cursor: pointer; font-weight: 600; transition: background 0.2s;
+  }
+  .dl-btn:hover { background: #c49010; color: white; }
+
+  /* ── PROFESSOR PANEL ── */
+  #prof-panel {
+    display: none;
+    background: white; border-radius: 12px;
+    border: 0.5px solid var(--gray-200);
+    padding: 2rem; margin-top: 2rem;
+    box-shadow: var(--shadow);
+  }
+  #prof-panel h3 { color: var(--azul); font-size: 1.05rem; margin-bottom: 1rem; }
+  #prof-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  #prof-table th { background: var(--azul); color: white; padding: 8px 12px; text-align: left; }
+  #prof-table td { padding: 7px 12px; border-bottom: 0.5px solid var(--gray-200); }
+  #prof-table tr:last-child td { border-bottom: none; }
+  #prof-table tr:nth-child(even) td { background: var(--gray-100); }
+
+  .prof-unlock {
+    margin-top: 2rem; display: flex; gap: 10px; align-items: center;
+  }
+  .prof-unlock input { flex: 1; padding: 8px 14px; border: 1px solid var(--gray-200); border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; }
+  .prof-unlock button {
+    background: var(--azul); color: white; border: none;
+    border-radius: var(--radius); padding: 8px 20px;
+    font-family: inherit; cursor: pointer; font-size: 0.95rem;
+  }
+
+  /* responsive */
+  @media (max-width: 600px) {
+    .header { padding: 1.25rem; }
+    main { padding: 1rem; }
+    .q-card { padding: 1.25rem; }
+    .result-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">ULS</div>
+  <div class="header-text">
+    <h1>Control — Números Complejos</h1>
+    <p>Ingeniería · Universidad de La Serena · Prof. Jonatan Vignatti</p>
+  </div>
+</div>
+
+<main>
+
+  <!-- PORTADA -->
+  <div class="cover-card" id="cover-section">
+    <h2>Identificación del estudiante</h2>
+    <label for="student-name">Nombre completo</label>
+    <input type="text" id="student-name" placeholder="Ej: Juan Pérez González" autocomplete="off">
+    <br>
+    <button class="start-btn" onclick="startQuiz()">Comenzar control →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-section">
+    <div class="progress-bar-wrap">
+      <div class="progress-info">
+        <span id="prog-text">Pregunta 1 de 20</span>
+        <span id="prog-score">Puntaje: 0</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div id="questions-container"></div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div id="score-section">
+    <div class="score-card">
+      <div class="score-ring">
+        <span class="pts" id="final-pts">0</span>
+        <span class="lbl">/ 20 pts</span>
+      </div>
+      <div class="score-name" id="final-name"></div>
+      <div class="nota-display" id="final-nota">1.0</div>
+      <div class="nota-label">Nota final (escala 1.0 – 7.0)</div>
+      <div class="result-grid">
+        <div class="result-stat"><div class="val" id="stat-correct">0</div><div class="key">Correctas</div></div>
+        <div class="result-stat"><div class="val" id="stat-wrong">0</div><div class="key">Incorrectas</div></div>
+        <div class="result-stat"><div class="val" id="stat-pct">0%</div><div class="key">Porcentaje</div></div>
+      </div>
+      <button class="dl-btn" onclick="downloadExcel()">⬇ Descargar resultados (Excel)</button>
+    </div>
+
+    <!-- Panel profesor -->
+    <div class="prof-unlock">
+      <input type="password" id="prof-pass" placeholder="Clave profesor (ver300)">
+      <button onclick="unlockProf()">Ver panel docente</button>
+    </div>
+    <div id="prof-panel">
+      <h3>Registro de estudiantes — sesión actual</h3>
+      <table id="prof-table">
+        <thead><tr><th>#</th><th>Nombre</th><th>Puntaje</th><th>Nota</th><th>Correctas</th><th>Incorrectas</th></tr></thead>
+        <tbody id="prof-tbody"></tbody>
+      </table>
+      <button class="dl-btn" style="margin-top:1rem;" onclick="downloadExcel()">⬇ Exportar todo (Excel)</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── TABLA DE CONVERSIÓN ──
+const SCORE_TABLE = [1.0,1.3,1.6,1.9,2.2,2.5,2.8,3.1,3.4,3.7,4.0,4.3,4.6,4.9,5.2,5.5,5.8,6.1,6.4,6.7,7.0];
+function scoreToNota(s) { return SCORE_TABLE[Math.max(0, Math.min(20, Math.round(s)))].toFixed(1); }
+
+// ── REGISTRO SESIÓN ──
+let sessionResults = JSON.parse(localStorage.getItem('uls_complejos_results') || '[]');
+let studentName = '';
+let answered = 0;
+let correct = 0;
+let shuffledQ = [];
+
+// ── BANCO DE PREGUNTAS ──
+// Cada pregunta: { text, options: [{tex, correct, feedback}] }
+// Las opciones se mezclan aleatoriamente al renderizar
+const BANK = [
+  // 1 — Forma binómica: hallar x e y
+  {
+    text: 'Determine los valores reales $x$ e $y$ tales que $(x+2) + (y-3)i = 5 - i$.',
+    options: [
+      { tex: 'x=3,\\; y=2',  correct: true,  fb: 'Igualando partes reales: $x+2=5\\Rightarrow x=3$; partes imaginarias: $y-3=-1\\Rightarrow y=2$. ✓' },
+      { tex: 'x=5,\\; y=-1', correct: false, fb: 'Hay que resolver cada ecuación: $x+2=5$ y $y-3=-1$, no leer directamente las componentes.' },
+      { tex: 'x=3,\\; y=-1', correct: false, fb: '$y-3=-1\\Rightarrow y=2$, no $y=-1$.' },
+      { tex: 'x=7,\\; y=2',  correct: false, fb: '$x+2=5\\Rightarrow x=3$, no $x=7$.' },
+    ]
+  },
+  // 2 — Producto
+  {
+    text: 'Calcule $(2+3i)(1-2i)$ y exprese en forma $a+bi$.',
+    options: [
+      { tex: '8 - i',   correct: true,  fb: '$(2)(1)-(3)(-2)=2+6=8$; $(2)(-2)+(3)(1)=-4+3=-1$. Resultado: $8-i$. ✓' },
+      { tex: '2 - 6i',  correct: false, fb: 'Hay cuatro términos al expandir: $(2)(1)+(2)(-2i)+(3i)(1)+(3i)(-2i)$.' },
+      { tex: '8 + i',   correct: false, fb: 'La parte imaginaria es $-4+3=-1$, no $+1$.' },
+      { tex: '-4 - i',  correct: false, fb: 'La parte real es $2\\ cdot1-3\\cdot(-2)=8$, no $-4$.' },
+    ]
+  },
+  // 3 — Cociente
+  {
+    text: 'Calcule $\\dfrac{4+2i}{1-i}$ en forma $a+bi$.',
+    options: [
+      { tex: '1 + 3i',            correct: true,  fb: 'Multiplicamos por $\\frac{1+i}{1+i}$: numerador $(4+2i)(1+i)=4+4i+2i-2=2+6i$; denominador $1+1=2$. Resultado: $1+3i$. ✓' },
+      { tex: '4 - 2i',            correct: false, fb: 'Hay que multiplicar por el conjugado del denominador $\\bar{z}_2=1+i$ y dividir por $|z_2|^2=2$.' },
+      { tex: '3 + i',             correct: false, fb: '$(4+2i)(1+i)=2+6i$; dividido $2$ da $1+3i$, no $3+i$.' },
+      { tex: '\\dfrac{2+6i}{2}=1+3i \\text{ (rev.)}', correct: false, fb: 'Esta opción es redundante; la correcta es $1+3i$.' },
+    ]
+  },
+  // 4 — Potencias de i
+  {
+    text: 'Simplifique $i^{45} - i^{30} + i^{17} - i^{8}$.',
+    options: [
+      { tex: 'i - (-1) + i - 1 = 2i', correct: true,  fb: '$i^{45}=i^{4\\cdot11+1}=i$; $i^{30}=i^{4\\cdot7+2}=-1$; $i^{17}=i$; $i^8=1$. Suma: $i+1+i-1=2i$. ✓' },
+      { tex: '0',    correct: false, fb: 'Calcula cada potencia por residuo mod 4: los resultados no se anulan.' },
+      { tex: '2',    correct: false, fb: 'Los términos $i$ no cancelan con los reales; la suma es $2i$, no $2$.' },
+      { tex: '-2i',  correct: false, fb: '$i^{45}=i$ y $i^{17}=i$ suman $2i$; los reales $i^{30}=-1$ e $i^8=1$ se anulan entre sí.' },
+    ]
+  },
+  // 5 — Módulo y conjugado: propiedad
+  {
+    text: 'Si $z = a+bi$, ¿cuál de las siguientes expresiones es siempre un número real no negativo?',
+    options: [
+      { tex: 'z\\,\\bar{z}',    correct: true,  fb: '$z\\bar{z}=(a+bi)(a-bi)=a^2+b^2=|z|^2\\geq0$. ✓' },
+      { tex: 'z + \\bar{z}',   correct: false, fb: '$z+\\bar{z}=2a$, que es real pero puede ser negativo si $a<0$.' },
+      { tex: 'z - \\bar{z}',   correct: false, fb: '$z-\\bar{z}=2bi$, que es imaginario puro (no real, salvo $b=0$).' },
+      { tex: 'z^2',            correct: false, fb: '$z^2=(a^2-b^2)+2abi$ en general es complejo.' },
+    ]
+  },
+  // 6 — Conversión a polar
+  {
+    text: 'Exprese $z=-2-2i$ en forma polar $r\\,e^{i\\theta}$ con $\\theta\\in(-\\pi,\\pi]$.',
+    options: [
+      { tex: '2\\sqrt{2}\\,e^{-i3\\pi/4}', correct: true,  fb: '$r=\\sqrt{4+4}=2\\sqrt{2}$; el punto está en el 3.° cuadrante: $\\theta=-\\pi+\\pi/4=-3\\pi/4$. ✓' },
+      { tex: '2\\sqrt{2}\\,e^{i5\\pi/4}',  correct: false, fb: '$5\\pi/4$ está fuera del intervalo $(-\\pi,\\pi]$; el argumento principal es $-3\\pi/4$.' },
+      { tex: '2\\,e^{-i3\\pi/4}',          correct: false, fb: '$r=\\sqrt{(-2)^2+(-2)^2}=2\\sqrt{2}$, no $2$.' },
+      { tex: '2\\sqrt{2}\\,e^{i3\\pi/4}',  correct: false, fb: '$3\\pi/4$ corresponde al 2.° cuadrante ($a<0,b>0$). Aquí $b=-2<0$.' },
+    ]
+  },
+  // 7 — Conversión polar → rectangular
+  {
+    text: 'El número complejo $z=4\\,e^{i\\,2\\pi/3}$ en forma $a+bi$ es:',
+    options: [
+      { tex: '-2+2\\sqrt{3}\\,i', correct: true,  fb: '$\\cos(2\\pi/3)=-1/2$, $\\sin(2\\pi/3)=\\sqrt{3}/2$; $z=4(-1/2+i\\sqrt{3}/2)=-2+2\\sqrt{3}i$. ✓' },
+      { tex: '2+2\\sqrt{3}\\,i',  correct: false, fb: '$\\cos(2\\pi/3)=-1/2<0$; la parte real es $-2$.' },
+      { tex: '-2-2\\sqrt{3}\\,i', correct: false, fb: '$\\sin(2\\pi/3)=+\\sqrt{3}/2>0$; la parte imaginaria es positiva.' },
+      { tex: '2\\sqrt{3}+2i',     correct: false, fb: 'No inviertas seno y coseno: $\\cos(2\\pi/3)=-1/2$ va con la parte real.' },
+    ]
+  },
+  // 8 — Multiplicación en forma polar
+  {
+    text: 'Sean $z_1=3\\,e^{i\\pi/4}$ y $z_2=2\\,e^{i\\pi/4}$. ¿Cuánto es $z_1\\cdot z_2$?',
+    options: [
+      { tex: '6i', correct: true,  fb: '$|z_1z_2|=6$; $\\arg=\\pi/4+\\pi/4=\\pi/2$; $6e^{i\\pi/2}=6(\\cos\\frac{\\pi}{2}+i\\sin\\frac{\\pi}{2})=6i$. ✓' },
+      { tex: '6',         correct: false, fb: 'El argumento resultante es $\\pi/2$, no $0$; el resultado no es real.' },
+      { tex: '6e^{i\\pi/8}', correct: false, fb: 'Los argumentos se suman: $\\pi/4+\\pi/4=\\pi/2$, no $\\pi/8$.' },
+      { tex: '5e^{i\\pi/2}', correct: false, fb: 'Los módulos se multiplican: $3\\cdot2=6$, no $5$.' },
+    ]
+  },
+  // 9 — De Moivre
+  {
+    text: 'Calcule $(1+i)^8$ usando la fórmula de De Moivre.',
+    options: [
+      { tex: '16', correct: true,  fb: '$1+i=\\sqrt{2}\\,e^{i\\pi/4}$; $(\\sqrt{2})^8=16$; $e^{i8\\pi/4}=e^{i2\\pi}=1$. Resultado: $16$. ✓' },
+      { tex: '16i',       correct: false, fb: '$8\\cdot(\\pi/4)=2\\pi$; $e^{i2\\pi}=1$, por lo que el resultado es real.' },
+      { tex: '-16',       correct: false, fb: '$e^{i2\\pi}=1$, no $-1$; el resultado es $+16$.' },
+      { tex: '8\\sqrt{2}', correct: false, fb: '$(\\sqrt{2})^8=(2^{1/2})^8=2^4=16$, no $8\\sqrt{2}$.' },
+    ]
+  },
+  // 10 — De Moivre aplicado a trigonometría
+  {
+    text: 'Usando De Moivre, $\\cos(3\\theta)$ expresado en términos de $\\cos\\theta$ es:',
+    options: [
+      { tex: '4\\cos^3\\theta - 3\\cos\\theta', correct: true,  fb: '$(\\cos\\theta+i\\sin\\theta)^3=\\cos3\\theta+i\\sin3\\theta$; expandiendo y tomando parte real: $\\cos^3\\theta-3\\cos\\theta\\sin^2\\theta=4\\cos^3\\theta-3\\cos\\theta$. ✓' },
+      { tex: '3\\cos^3\\theta - \\cos\\theta',  correct: false, fb: 'La identidad correcta proviene de binomio cúbico y $\\sin^2=1-\\cos^2$: resulta $4\\cos^3\\theta-3\\cos\\theta$.' },
+      { tex: '\\cos^3\\theta - 3\\sin^2\\theta\\cos\\theta', correct: false, fb: 'Esta es la expresión sin simplificar; usando $\\sin^2=1-\\cos^2$ obtienes $4\\cos^3\\theta-3\\cos\\theta$.' },
+      { tex: '3\\cos\\theta - 4\\cos^3\\theta', correct: false, fb: 'El signo es incorrecto; la identidad es $4\\cos^3\\theta-3\\cos\\theta$.' },
+    ]
+  },
+  // 11 — Raíces cuartas
+  {
+    text: 'Las cuatro raíces cuartas de $z=16$ son:',
+    options: [
+      { tex: '2,\\; -2,\\; 2i,\\; -2i', correct: true,  fb: '$16=16e^{i\\cdot0}$; $w_k=2e^{ik\\pi/2}$ para $k=0,1,2,3$: $2,\\,2i,\\,-2,\\,-2i$. ✓' },
+      { tex: '2,\\; -2',               correct: false, fb: 'Un número complejo tiene exactamente $n$ raíces $n$-ésimas; $z^4=16$ tiene 4 soluciones en $\\mathbb{C}$.' },
+      { tex: '4,\\; -4,\\; 4i,\\; -4i', correct: false, fb: 'El módulo de las raíces es $16^{1/4}=2$, no $4$.' },
+      { tex: '\\sqrt{2},\\; -\\sqrt{2},\\; \\sqrt{2}i,\\; -\\sqrt{2}i', correct: false, fb: '$16^{1/4}=2$, no $\\sqrt{2}$.' },
+    ]
+  },
+  // 12 — Raíces cúbicas de la unidad
+  {
+    text: '¿Cuáles son las tres raíces cúbicas de la unidad ($z^3=1$)?',
+    options: [
+      { tex: '1,\\; e^{i2\\pi/3},\\; e^{i4\\pi/3}', correct: true,  fb: '$1=e^{i0}$; $w_k=e^{i2\\pi k/3}$ para $k=0,1,2$. ✓' },
+      { tex: '1,\\; i,\\; -1',                       correct: false, fb: 'Esas son raíces cuartas de $1$. Las cúbicas se separan $120°=2\\pi/3$.' },
+      { tex: '1,\\; e^{i\\pi/3},\\; e^{i2\\pi/3}',  correct: false, fb: 'La separación entre raíces cúbicas es $2\\pi/3$ (120°), no $\\pi/3$.' },
+      { tex: '1,\\; -1,\\; i',                       correct: false, fb: '$(-1)^3=-1\\neq1$; $i^3=-i\\neq1$. Solo $1$ es raíz cúbica real de la unidad.' },
+    ]
+  },
+  // 13 — Ecuación cuadrática compleja
+  {
+    text: 'Resuelva en $\\mathbb{C}$: $z^2 - 4z + 13 = 0$.',
+    options: [
+      { tex: 'z = 2 \\pm 3i',  correct: true,  fb: '$\\Delta=16-52=-36$; $z=\\frac{4\\pm 6i}{2}=2\\pm3i$. ✓' },
+      { tex: 'z = 4 \\pm 3i',  correct: false, fb: 'La parte real es $\\frac{4}{2}=2$, no $4$.' },
+      { tex: 'z = 2 \\pm 6i',  correct: false, fb: '$\\sqrt{-36}=6i$; $\\frac{6i}{2}=3i$, no $6i$.' },
+      { tex: 'z = -2 \\pm 3i', correct: false, fb: 'La fórmula da $\\frac{-(-4)\\pm\\ldots}{2}=\\frac{4\\pm6i}{2}$; la parte real es $+2$.' },
+    ]
+  },
+  // 14 — Ecuación bicuadrada
+  {
+    text: 'La ecuación $z^4 + 5z^2 + 6 = 0$ tiene por soluciones:',
+    options: [
+      { tex: 'z=\\pm i\\sqrt{2},\\; z=\\pm i\\sqrt{3}', correct: true,  fb: 'Cambio $u=z^2$: $u^2+5u+6=0\\Rightarrow(u+2)(u+3)=0$; $z^2=-2\\Rightarrow z=\\pm i\\sqrt{2}$; $z^2=-3\\Rightarrow z=\\pm i\\sqrt{3}$. ✓' },
+      { tex: 'z=\\pm\\sqrt{2},\\; z=\\pm\\sqrt{3}',      correct: false, fb: '$z^2=-2$ y $z^2=-3$ no tienen soluciones reales; las raíces son imaginarias.' },
+      { tex: 'z=\\pm 2i,\\; z=\\pm 3i',                 correct: false, fb: '$(\\pm2i)^2=-4\\neq-2$. Las raíces son $\\pm i\\sqrt{2}$ y $\\pm i\\sqrt{3}$.' },
+      { tex: 'z=\\pm 2,\\; z=\\pm 3',                   correct: false, fb: '$z^4+5z^2+6=0$ no tiene raíces reales; el discriminante de $u^2+5u+6$ da $u=-2$ y $u=-3$, negativos.' },
+    ]
+  },
+  // 15 — Logaritmo complejo
+  {
+    text: 'Calcule el valor principal de $\\ln(1+i)$.',
+    options: [
+      { tex: '\\dfrac{\\ln 2}{2} + \\dfrac{\\pi}{4}i', correct: true,  fb: '$|1+i|=\\sqrt{2}$; $\\ln\\sqrt{2}=\\frac{\\ln 2}{2}$; $\\arg(1+i)=\\pi/4$. Luego $\\ln(1+i)=\\frac{\\ln2}{2}+\\frac{\\pi}{4}i$. ✓' },
+      { tex: '\\ln 2 + \\dfrac{\\pi}{4}i',             correct: false, fb: '$\\ln|z|=\\ln\\sqrt{2}=\\frac{1}{2}\\ln2$, no $\\ln2$.' },
+      { tex: '\\dfrac{\\ln 2}{2} + \\dfrac{\\pi}{2}i', correct: false, fb: '$\\arg(1+i)=\\pi/4$ (45°), no $\\pi/2$.' },
+      { tex: '1 + \\dfrac{\\pi}{4}i',                  correct: false, fb: '$\\ln|z|=\\ln\\sqrt{2}\\approx0.347$, no $1$.' },
+    ]
+  },
+  // 16 — Exponencial compleja
+  {
+    text: 'Exprese $e^{2+i\\pi/3}$ en forma $a+bi$.',
+    options: [
+      { tex: 'e^2\\!\\left(\\dfrac{1}{2}+\\dfrac{\\sqrt{3}}{2}i\\right)', correct: true, fb: '$e^{2+i\\pi/3}=e^2\\cdot e^{i\\pi/3}=e^2(\\cos\\frac{\\pi}{3}+i\\sin\\frac{\\pi}{3})=e^2(\\frac{1}{2}+\\frac{\\sqrt{3}}{2}i)$. ✓' },
+      { tex: 'e^2\\!\\left(\\dfrac{\\sqrt{3}}{2}+\\dfrac{1}{2}i\\right)', correct: false, fb: '$\\cos(\\pi/3)=1/2$ (parte real) y $\\sin(\\pi/3)=\\sqrt{3}/2$ (parte imaginaria); no los inviertas.' },
+      { tex: 'e^2\\!\\left(-\\dfrac{1}{2}+\\dfrac{\\sqrt{3}}{2}i\\right)', correct: false, fb: '$\\cos(\\pi/3)=+1/2$, no $-1/2$ (que corresponde a $\\cos(2\\pi/3)$).' },
+      { tex: '\\dfrac{1}{2}+\\dfrac{\\sqrt{3}}{2}i', correct: false, fb: 'Hay que multiplicar por $e^2$: $e^{2+i\\theta}=e^2\\cdot e^{i\\theta}$.' },
+    ]
+  },
+  // 17 — Propiedad del módulo
+  {
+    text: 'Si $|z_1|=3$ y $|z_2|=4$, ¿cuánto vale $\\left|\\dfrac{z_1^2}{\\bar{z}_2}\\right|$?',
+    options: [
+      { tex: '\\dfrac{9}{4}', correct: true,  fb: '$\\left|\\frac{z_1^2}{\\bar{z}_2}\\right|=\\frac{|z_1|^2}{|\\bar{z}_2|}=\\frac{9}{4}$, pues $|\\bar{z}_2|=|z_2|=4$. ✓' },
+      { tex: '9',             correct: false, fb: 'No olvides dividir: $\\frac{|z_1|^2}{|\\bar{z}_2|}=\\frac{9}{4}$, no $9$.' },
+      { tex: '\\dfrac{3}{4}', correct: false, fb: '$|z_1^2|=|z_1|^2=9$, no $|z_1|=3$.' },
+      { tex: '36',            correct: false, fb: 'Hay una división, no una multiplicación: $\\frac{9}{4}$, no $9\\cdot4$.' },
+    ]
+  },
+  // 18 — Argumento de una potencia
+  {
+    text: 'Si $z=2e^{i\\pi/5}$, ¿cuál es el argumento principal de $z^5$?',
+    options: [
+      { tex: '\\pi', correct: true,  fb: '$\\arg(z^5)=5\\cdot\\pi/5=\\pi$, que pertenece a $(-\\pi,\\pi]$. ✓' },
+      { tex: '5\\pi/2', correct: false, fb: '$5\\cdot\\pi/5=\\pi$, que ya está en el intervalo principal; no se acumula $5\\pi$.' },
+      { tex: '\\pi/5',  correct: false, fb: 'Al elevar a la $n$, el argumento se multiplica: $\\arg(z^5)=5\\cdot(\\pi/5)=\\pi$.' },
+      { tex: '0',       correct: false, fb: '$5\\cdot(\\pi/5)=\\pi\\neq0$; $z^5=32e^{i\\pi}=-32$ (real negativo).' },
+    ]
+  },
+  // 19 — Raíces de ecuación con forma polar
+  {
+    text: 'Halle la raíz cuadrada principal de $z=-9$ (argumento en $(-\\pi,\\pi]$).',
+    options: [
+      { tex: '3i',  correct: true,  fb: '$-9=9e^{i\\pi}$; raíz principal: $3e^{i\\pi/2}=3i$. ✓' },
+      { tex: '-3i', correct: false, fb: '$-3i=3e^{-i\\pi/2}$ correspondería a $k=1$, no a la raíz principal ($k=0$).' },
+      { tex: '3',   correct: false, fb: '$3^2=9\\neq-9$.' },
+      { tex: '\\pm 3i', correct: false, fb: 'La raíz principal es única: $3e^{i\\pi/2}=3i$ (la de argumento $\\pi/2$).' },
+    ]
+  },
+  // 20 — Propiedad conjugado y módulo combinados
+  {
+    text: 'Para cualquier $z\\in\\mathbb{C}$, la expresión $\\dfrac{z+\\bar{z}}{2}$ es igual a:',
+    options: [
+      { tex: '\\operatorname{Re}(z)', correct: true,  fb: 'Si $z=a+bi$, entonces $z+\\bar{z}=(a+bi)+(a-bi)=2a$; dividido 2 da $a=\\operatorname{Re}(z)$. ✓' },
+      { tex: '\\operatorname{Im}(z)', correct: false, fb: '$\\operatorname{Im}(z)=\\frac{z-\\bar{z}}{2i}$, no $\\frac{z+\\bar{z}}{2}$.' },
+      { tex: '|z|',                  correct: false, fb: '$|z|=\\sqrt{a^2+b^2}$; la fórmula dada extrae solo la parte real.' },
+      { tex: '\\bar{z}',             correct: false, fb: '$\\bar{z}=a-bi$; $\\frac{z+\\bar{z}}{2}=a=\\operatorname{Re}(z)$, no el conjugado completo.' },
+    ]
+  },
+];
+
+// ── MEZCLA ALEATORIA ──
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Prepara preguntas mezclando opciones
+function prepareQuestions() {
+  const qs = shuffle(BANK); // mezcla orden de preguntas también
+  return qs.map((q,qi) => ({
+    ...q,
+    shuffledOpts: shuffle(q.options),
+    qIndex: qi
+  }));
+}
+
+// ── INICIO ──
+function startQuiz() {
+  studentName = document.getElementById('student-name').value.trim();
+  if (!studentName) { alert('Por favor ingresa tu nombre completo.'); return; }
+  document.getElementById('cover-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  shuffledQ = prepareQuestions();
+  renderAllQuestions();
+}
+
+// ── RENDER TODAS LAS PREGUNTAS ──
+function renderAllQuestions() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  shuffledQ.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = 'qcard-'+idx;
+
+    const letters = ['A','B','C','D'];
+    let optsHtml = q.shuffledOpts.map((opt, oi) => `
+      <li>
+        <button class="option-btn" id="opt-${idx}-${oi}" onclick="selectAnswer(${idx},${oi})" data-correct="${opt.correct}" data-fb="${escHtml(opt.fb)}">
+          <span class="opt-letter">${letters[oi]}</span>
+          <span class="opt-tex">\\(${opt.tex}\\)</span>
+        </button>
+      </li>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="q-number">Pregunta ${idx+1} de 20</div>
+      <div class="q-text">\\(${q.text.startsWith('$') ? q.text.slice(1,-1) : q.text}\\)</div>
+      <ul class="options-list">${optsHtml}</ul>
+      <div class="feedback" id="fb-${idx}" style="display:none"></div>
+    `;
+    // fix: wrap math properly
+    card.querySelector('.q-text').innerHTML = q.text;
+    container.appendChild(card);
+  });
+
+  // Render KaTeX
+  renderMathInElement(container, {
+    delimiters: [
+      {left:'$$', right:'$$', display:true},
+      {left:'$',  right:'$',  display:false},
+      {left:'\\(', right:'\\)', display:false},
+      {left:'\\[', right:'\\]', display:true},
+    ],
+    throwOnError: false
+  });
+  updateProgress();
+}
+
+function escHtml(s) { return s.replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ── SELECCIÓN DE RESPUESTA ──
+function selectAnswer(qIdx, optIdx) {
+  const qCard = document.getElementById('qcard-'+qIdx);
+  const btns = qCard.querySelectorAll('.option-btn');
+
+  // Deshabilitar todos
+  btns.forEach(b => b.disabled = true);
+
+  const chosen = btns[optIdx];
+  const isCorrect = chosen.dataset.correct === 'true';
+  const fb = shuffledQ[qIdx].shuffledOpts[optIdx].fb;
+
+  if (isCorrect) {
+    chosen.classList.add('selected-correct');
+    correct++;
+  } else {
+    chosen.classList.add('selected-wrong');
+    // Revelar correcta
+    btns.forEach(b => {
+      if (b.dataset.correct === 'true') b.classList.add('reveal-correct');
+    });
+  }
+
+  // Mostrar feedback
+  const fbEl = document.getElementById('fb-'+qIdx);
+  fbEl.style.display = 'block';
+  fbEl.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  fbEl.innerHTML = (isCorrect ? '<strong>¡Correcto!</strong> ' : '<strong>Incorrecto.</strong> ') + fb;
+  renderMathInElement(fbEl, {
+    delimiters:[{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],
+    throwOnError:false
+  });
+
+  answered++;
+  updateProgress();
+  scrollToCard(qIdx);
+
+  if (answered === 20) {
+    setTimeout(showScore, 800);
+  }
+}
+
+function scrollToCard(idx) {
+  const next = document.getElementById('qcard-'+(idx+1));
+  if (next) next.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function updateProgress() {
+  document.getElementById('prog-text').textContent = `Respondidas: ${answered} de 20`;
+  document.getElementById('prog-score').textContent = `Correctas: ${correct}`;
+  document.getElementById('prog-fill').style.width = (answered/20*100)+'%';
+}
+
+// ── RESULTADO ──
+function showScore() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('score-section').style.display = 'block';
+
+  const nota = scoreToNota(correct);
+  document.getElementById('final-pts').textContent = correct;
+  document.getElementById('final-nota').textContent = nota;
+  document.getElementById('final-name').textContent = studentName;
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = 20-correct;
+  document.getElementById('stat-pct').textContent = Math.round(correct/20*100)+'%';
+
+  // Guardar en sesión
+  const entry = {
+    nombre: studentName,
+    puntaje: correct,
+    nota: nota,
+    correctas: correct,
+    incorrectas: 20-correct,
+    fecha: new Date().toLocaleString('es-CL')
+  };
+  sessionResults.push(entry);
+  localStorage.setItem('uls_complejos_results', JSON.stringify(sessionResults));
+
+  document.getElementById('score-section').scrollIntoView({behavior:'smooth'});
+}
+
+// ── PANEL PROFESOR ──
+function unlockProf() {
+  const pw = document.getElementById('prof-pass').value;
+  if (pw !== 'ver300') { alert('Clave incorrecta.'); return; }
+  const panel = document.getElementById('prof-panel');
+  panel.style.display = 'block';
+  const tbody = document.getElementById('prof-tbody');
+  tbody.innerHTML = '';
+  const results = JSON.parse(localStorage.getItem('uls_complejos_results') || '[]');
+  results.forEach((r,i) => {
+    tbody.innerHTML += `<tr>
+      <td>${i+1}</td>
+      <td>${r.nombre}</td>
+      <td>${r.puntaje}/20</td>
+      <td><strong>${r.nota}</strong></td>
+      <td>${r.correctas}</td>
+      <td>${r.incorrectas}</td>
+    </tr>`;
+  });
+  if (!results.length) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888">Sin registros aún.</td></tr>';
+}
+
+// ── EXPORTAR EXCEL ──
+function downloadExcel() {
+  const results = JSON.parse(localStorage.getItem('uls_complejos_results') || '[]');
+  if (!results.length) { alert('Sin datos para exportar.'); return; }
+
+  const rows = [['N°','Nombre','Puntaje','Nota','Correctas','Incorrectas','Fecha']];
+  results.forEach((r,i) => {
+    rows.push([i+1, r.nombre, r.puntaje, parseFloat(r.nota), r.correctas, r.incorrectas, r.fecha]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:5},{wch:30},{wch:10},{wch:8},{wch:12},{wch:14},{wch:22}];
+
+  // Estilo header (xlsx full soporta estilos básicos via SheetJS-pro, aquí usamos aoa)
+  XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
+
+  // Hoja resumen
+  const promedio = (results.reduce((s,r)=>s+parseFloat(r.nota),0)/results.length).toFixed(2);
+  const suma2 = [
+    ['Resumen — Control Números Complejos'],
+    ['Prof. Jonatan Vignatti — Universidad de La Serena'],
+    [''],
+    ['Total estudiantes', results.length],
+    ['Promedio nota', promedio],
+    ['Nota mínima', Math.min(...results.map(r=>parseFloat(r.nota)))],
+    ['Nota máxima', Math.max(...results.map(r=>parseFloat(r.nota)))],
+    ['Aprobados (≥ 4.0)', results.filter(r=>parseFloat(r.nota)>=4.0).length],
+    ['Reprobados (< 4.0)', results.filter(r=>parseFloat(r.nota)<4.0).length],
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(suma2);
+  ws2['!cols'] = [{wch:28},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen');
+
+  XLSX.writeFile(wb, `Control_NumerosComplejos_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+</script>
+</body>
+</html>
